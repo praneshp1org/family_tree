@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>प्यारा श्रेष्ठ family tree</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        nepal: {
+                            red: '#C8102E',
+                            gold: '#D4AF37',
+                            emerald: '#059669',
+                            warmBg: '#FAF7F2',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-screen w-screen flex flex-col antialiased text-slate-800">
+
+    <header class="absolute top-0 left-0 right-0 z-30 px-6 py-4 flex items-center justify-between pointer-events-none">
+        <div class="glass-panel px-5 py-3 rounded-2xl shadow-sm border border-amber-900/10 flex items-center pointer-events-auto">
+            <h1 id="siteTitle" class="text-xl font-bold tracking-tight text-slate-900 leading-tight">प्यारा श्रेष्ठ family tree</h1>
+        </div>
+
+        <div id="lineageBanner" class="hidden glass-panel px-5 py-2.5 rounded-2xl shadow-md border border-amber-500/30 text-xs font-bold text-slate-800 flex items-center gap-3 animate-pulse pointer-events-auto">
+            <i class="fa-solid fa-route text-amber-600 text-sm"></i>
+            <span id="lineageBannerText">Hover over any person to highlight their lineage</span>
+        </div>
+
+        <div class="flex items-center gap-3 pointer-events-auto">
+            <div class="relative glass-panel rounded-2xl shadow-sm border border-slate-200/80 w-64 md:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" placeholder="Search family member..." 
+                    class="w-full pl-10 pr-10 py-2.5 bg-transparent text-sm text-slate-800 placeholder-slate-400 focus:outline-none rounded-2xl">
+                <button id="clearSearch" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+                <div id="searchResults" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 max-h-60 overflow-y-auto z-50 py-1"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full h-full relative overflow-hidden bg-[#FAF7F2]">
+        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 24px 24px;"></div>
+
+        <div class="absolute bottom-6 left-6 z-30 glass-panel px-4 py-3 rounded-2xl shadow-lg border border-slate-200/80 flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-700">
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-1 bg-slate-800 rounded"></span> <span id="legendParentText">Parent &amp; Sibling Lines</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="w-3.5 h-3.5 rounded-md bg-amber-400 border border-amber-600 shadow-sm"></span> <span id="legendAncestorsText">Ancestors (Top)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="w-3.5 h-3.5 rounded-md bg-emerald-500 border border-emerald-700 shadow-sm"></span> <span id="legendHoveredText">Hovered Member</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="w-3.5 h-3.5 rounded-md bg-red-600 border border-red-800 shadow-sm"></span> <span id="legendDescendantsText">Descendants (Bottom)</span>
+            </div>
+            <div class="h-3 w-px bg-slate-300"></div>
+            <div id="legendTipText" class="text-slate-500 font-normal">🖱 Drag background or scroll wheel to navigate</div>
+        </div>
+
+        <div class="absolute bottom-6 right-6 z-30 flex flex-col gap-2 glass-panel p-1.5 rounded-2xl shadow-lg border border-slate-200/80">
+            <button id="zoomInBtn" title="Zoom In" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-700 transition">
+                <i class="fa-solid fa-plus text-base"></i>
+            </button>
+            <button id="zoomOutBtn" title="Zoom Out" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-700 transition">
+                <i class="fa-solid fa-minus text-base"></i>
+            </button>
+            <button id="resetZoomBtn" title="Reset View" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-700 transition">
+                <i class="fa-solid fa-compress text-base"></i>
+            </button>
+        </div>
+
+        <div id="treeViewport" class="w-full h-full relative tree-container overflow-hidden">
+            <div id="treeCanvas" class="absolute origin-top-left transform-gpu min-w-max min-h-max p-20 relative">
+                <svg id="svgConnectors" class="absolute top-0 left-0 pointer-events-none z-10 overflow-visible"></svg>
+                <div id="treeNodes" class="relative z-20 flex flex-col gap-28 items-center min-w-full"></div>
+            </div>
+        </div>
+    </main>
+
+    <aside id="memberDrawer" class="fixed top-0 right-0 h-full w-full sm:w-96 glass-panel bg-white/95 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out border-l border-slate-200 flex flex-col">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <span id="memberProfileTitle" class="text-xs font-bold tracking-wider text-amber-700 uppercase">Member Profile</span>
+            <button id="closeDrawerBtn" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <div id="drawerContent" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
+    </aside>
+
+    <script>
+        (function () {
+            const cacheBuster = Date.now().toString();
+
+            const loadScript = (src, onLoad) => {
+                const script = document.createElement('script');
+                script.src = `${src}?v=${cacheBuster}`;
+                if (onLoad) script.onload = onLoad;
+                document.body.appendChild(script);
+            };
+
+            loadScript('data/family-data.js', () => {
+                loadScript('assets/js/app.js');
+            });
+        })();
+    </script>
+</body>
+</html>
