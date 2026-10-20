@@ -1,5 +1,25 @@
 const DEFAULT_FAMILY_DATA = window.DEFAULT_FAMILY_DATA || [];
 
+const BRANCH_COLORS = ['#0ea5e9', '#f97316', '#14b8a6', '#ec4899', '#8b5cf6', '#f59e0b', '#10b981', '#e11d48', '#06b6d4', '#6366f1'];
+const branchColorMap = new Map();
+
+function getUnionKey(parentIds = []) {
+    if (!Array.isArray(parentIds) || parentIds.length === 0) return '';
+    return [...parentIds].sort().join('-');
+}
+
+function getBranchColorByParents(parentIds = []) {
+    const unionKey = getUnionKey(parentIds);
+    if (!unionKey) return '#1e293b';
+
+    if (!branchColorMap.has(unionKey)) {
+        const color = BRANCH_COLORS[branchColorMap.size % BRANCH_COLORS.length];
+        branchColorMap.set(unionKey, color);
+    }
+
+    return branchColorMap.get(unionKey);
+}
+
 const translations = {
     en: {
         siteTitle: 'प्यारा श्रेष्ठ family tree',
@@ -8,6 +28,7 @@ const translations = {
         jsonData: 'JSON Data',
         lineageHint: 'Hover over any person to highlight their lineage',
         legendParent: 'Parent & Sibling Lines',
+        legendBranch: 'Branch Colors = Parent Couple',
         legendAncestors: 'Ancestors (Top)',
         legendHovered: 'Hovered Member',
         legendDescendants: 'Descendants (Bottom)',
@@ -31,6 +52,9 @@ const translations = {
         lifespan: 'Lifespan',
         present: 'Present',
         membersLabel: 'Members',
+        branchOf: 'Branch of',
+        exportPng: 'Export PNG',
+        exporting: 'Exporting...',
         zoomIn: 'Zoom In',
         zoomOut: 'Zoom Out',
         resetView: 'Reset View',
@@ -43,6 +67,7 @@ const translations = {
         jsonData: 'JSON डेटा',
         lineageHint: 'कुनै व्यक्तिको वंशलाई हाइलाइट गर्नमाथि होभर गर्नुहोस्',
         legendParent: 'अभिभावक र सहोदर लाइनहरू',
+        legendBranch: 'शाखा रङ = अभिभावक जोडी',
         legendAncestors: 'वंशज (माथि)',
         legendHovered: 'हाइलाइट गरिएको सदस्य',
         legendDescendants: 'वंशधर (तल)',
@@ -66,6 +91,9 @@ const translations = {
         lifespan: 'जीवनकाल',
         present: 'हालसम्म',
         membersLabel: 'सदस्यहरू',
+        branchOf: 'शाखा',
+        exportPng: 'PNG निर्यात',
+        exporting: 'निर्यात हुँदै...',
         zoomIn: 'जूम इन',
         zoomOut: 'जूम आउट',
         resetView: 'दृश्य रिसेट',
@@ -121,6 +149,9 @@ function applyLanguage() {
     const legendParentText = document.getElementById('legendParentText');
     if (legendParentText) legendParentText.textContent = getTranslation('legendParent');
 
+    const legendBranchText = document.getElementById('legendBranchText');
+    if (legendBranchText) legendBranchText.textContent = getTranslation('legendBranch');
+
     const legendAncestorsText = document.getElementById('legendAncestorsText');
     if (legendAncestorsText) legendAncestorsText.textContent = getTranslation('legendAncestors');
 
@@ -138,6 +169,9 @@ function applyLanguage() {
 
     const zoomInBtn = document.getElementById('zoomInBtn');
     if (zoomInBtn) zoomInBtn.title = getTranslation('zoomIn');
+
+    const exportPngBtn = document.getElementById('exportPngBtn');
+    if (exportPngBtn) exportPngBtn.title = getTranslation('exportPng');
 
     const zoomOutBtn = document.getElementById('zoomOutBtn');
     if (zoomOutBtn) zoomOutBtn.title = getTranslation('zoomOut');
@@ -181,6 +215,7 @@ function getSpouses(member) {
 
 function initTree() {
     treeNodes.innerHTML = '';
+    branchColorMap.clear();
     updateMemberCount();
 
     const maxGen = Math.max(...familyData.map(m => m.generation || 1));
@@ -259,6 +294,7 @@ function createMemberCard(member) {
 
     const parentMembers = familyData.filter(m => member.parents && member.parents.includes(m.id));
     const parentNames = parentMembers.map(p => p.name.split(' ')[0]).join(' & ');
+    const branchColor = getBranchColorByParents(member.parents || []);
 
     card.className = `member-card cursor-pointer bg-white rounded-2xl p-3 shadow-md border-2 ${genderBorder} w-52 sm:w-56 flex flex-col gap-2 relative z-20 select-none`;
 
@@ -276,8 +312,8 @@ function createMemberCard(member) {
             </div>
         </div>
         ${parentNames ? `
-            <div class="bg-amber-50 rounded-lg px-2 py-1 text-[9.5px] font-bold text-amber-900 flex items-center justify-between border border-amber-200/80 truncate">
-                <span class="truncate">${getTranslation('childOf')} ${parentNames}</span>
+            <div class="branch-chip bg-sky-50/70 rounded-lg px-2 py-1 text-[9.5px] font-bold text-slate-800 flex items-center justify-between border border-slate-200/80 truncate" style="border-left-color:${branchColor}">
+                <span class="truncate"><span class="branch-chip-label">${getTranslation('branchOf')}:</span> ${parentNames}</span>
                 <i class="fa-solid fa-arrow-up text-[9px] text-amber-600"></i>
             </div>
         ` : `
@@ -425,28 +461,29 @@ function drawOrthogonalConnectors() {
 
         const minY = Math.min(...childCoords.map(c => c.y));
         const midY = parentY + (minY - parentY) * 0.45;
+        const branchColor = getBranchColorByParents(parents);
 
-        createSvgPath(`M ${parentX} ${parentY} V ${midY}`, parents, null);
-        createJunctionDot(parentX, midY, parents, null);
+        createSvgPath(`M ${parentX} ${parentY} V ${midY}`, parents, null, false, branchColor);
+        createJunctionDot(parentX, midY, parents, null, branchColor);
 
         const allX = [parentX, ...childCoords.map(c => c.x)];
         const minSpanX = Math.min(...allX);
         const maxSpanX = Math.max(...allX);
 
-        createSvgPath(`M ${minSpanX} ${midY} H ${maxSpanX}`, parents, null);
+        createSvgPath(`M ${minSpanX} ${midY} H ${maxSpanX}`, parents, null, false, branchColor);
 
         childCoords.forEach(c => {
-            createSvgPath(`M ${c.x} ${midY} V ${c.y}`, parents, c.id);
-            createJunctionDot(c.x, c.y, parents, c.id);
+            createSvgPath(`M ${c.x} ${midY} V ${c.y}`, parents, c.id, false, branchColor);
+            createJunctionDot(c.x, c.y, parents, c.id, branchColor);
         });
     });
 }
 
-function createSvgPath(d, parents, childId, isSpouse = false) {
+function createSvgPath(d, parents, childId, isSpouse = false, strokeColor = '#1e293b') {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', d);
     path.setAttribute('fill', 'none');
-    path.setAttribute('stroke', isSpouse ? '#d97706' : '#1e293b');
+    path.setAttribute('stroke', isSpouse ? '#d97706' : strokeColor);
     path.setAttribute('stroke-width', isSpouse ? '2' : '3');
     if (isSpouse) path.setAttribute('stroke-dasharray', '4');
     path.setAttribute('class', 'connector-line');
@@ -456,12 +493,12 @@ function createSvgPath(d, parents, childId, isSpouse = false) {
     svgConnectors.appendChild(path);
 }
 
-function createJunctionDot(cx, cy, parents, childId) {
+function createJunctionDot(cx, cy, parents, childId, fillColor = '#1e293b') {
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttribute('cx', cx);
     circle.setAttribute('cy', cy);
     circle.setAttribute('r', '4');
-    circle.setAttribute('fill', '#1e293b');
+    circle.setAttribute('fill', fillColor);
     circle.setAttribute('class', 'junction-dot');
     if (parents) circle.dataset.parents = parents.join(',');
     if (childId) circle.dataset.child = childId;
@@ -654,6 +691,10 @@ function setupPanZoom() {
     document.getElementById('resetZoomBtn').addEventListener('click', () => {
         centerTree();
     });
+
+    document.getElementById('exportPngBtn')?.addEventListener('click', () => {
+        exportTreeAsPng();
+    });
 }
 
 function centerTree() {
@@ -662,6 +703,111 @@ function centerTree() {
     panY = 40;
     treeCanvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
     drawOrthogonalConnectors();
+}
+
+async function exportTreeAsPng() {
+    const exportBtn = document.getElementById('exportPngBtn');
+    const drawer = document.getElementById('memberDrawer');
+
+    if (!exportBtn || typeof window.html2canvas !== 'function') {
+        alert('PNG export is not available right now.');
+        return;
+    }
+
+    const previousTitle = exportBtn.title;
+    const previousDisabled = exportBtn.disabled;
+    const wasDrawerOpen = drawer && !drawer.classList.contains('translate-x-full');
+    let exportSurface = null;
+
+    try {
+        exportBtn.disabled = true;
+        exportBtn.title = getTranslation('exporting');
+        exportBtn.classList.add('opacity-60', 'cursor-not-allowed');
+
+        if (wasDrawerOpen) {
+            drawer.classList.add('translate-x-full');
+        }
+
+        if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+        }
+
+        const canvasClone = treeCanvas.cloneNode(true);
+        canvasClone.classList.remove('transform-gpu');
+        canvasClone.style.transform = 'none';
+        canvasClone.style.position = 'static';
+        canvasClone.style.width = `${treeCanvas.scrollWidth}px`;
+        canvasClone.style.height = `${treeCanvas.scrollHeight}px`;
+        canvasClone.style.minWidth = `${treeCanvas.scrollWidth}px`;
+        canvasClone.style.minHeight = `${treeCanvas.scrollHeight}px`;
+
+        // Export-only breathing room to avoid html2canvas text clipping on tight rows.
+        canvasClone.querySelectorAll('.member-card').forEach(card => {
+            card.style.overflow = 'visible';
+            card.style.paddingBottom = '14px';
+        });
+
+        canvasClone.querySelectorAll('.member-card h4').forEach(el => {
+            el.style.lineHeight = '1.3';
+            el.style.paddingBottom = '2px';
+        });
+
+        canvasClone.querySelectorAll('.member-card p').forEach(el => {
+            el.style.lineHeight = '1.35';
+            el.style.paddingBottom = '2px';
+        });
+
+        canvasClone.querySelectorAll('.member-card .branch-chip').forEach(el => {
+            el.style.minHeight = '26px';
+            el.style.alignItems = 'center';
+        });
+
+        exportSurface = document.createElement('div');
+        exportSurface.style.position = 'fixed';
+        exportSurface.style.left = '0';
+        exportSurface.style.top = '0';
+        exportSurface.style.transform = 'none';
+        exportSurface.style.opacity = '1';
+        exportSurface.style.pointerEvents = 'none';
+        exportSurface.style.padding = '72px';
+        exportSurface.style.background = '#FAF7F2';
+        exportSurface.style.display = 'inline-block';
+        exportSurface.style.zIndex = '1';
+        exportSurface.appendChild(canvasClone);
+        document.body.appendChild(exportSurface);
+
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+        const canvas = await window.html2canvas(exportSurface, {
+            backgroundColor: '#FAF7F2',
+            scale: Math.min(2, window.devicePixelRatio || 1),
+            useCORS: true,
+            allowTaint: false,
+            logging: false
+        });
+
+        const now = new Date();
+        const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const link = document.createElement('a');
+        link.download = `family-tree-${stamp}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (err) {
+        console.error('Failed to export PNG', err);
+        alert('Failed to export PNG. Please try again.');
+    } finally {
+        if (exportSurface && exportSurface.parentNode) {
+            exportSurface.parentNode.removeChild(exportSurface);
+        }
+
+        if (wasDrawerOpen) {
+            drawer.classList.remove('translate-x-full');
+        }
+
+        exportBtn.disabled = previousDisabled;
+        exportBtn.title = previousTitle;
+        exportBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+    }
 }
 
 function openDrawer(memberId) {

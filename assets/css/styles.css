@@ -90,6 +90,15 @@ body {
     z-index: 30 !important;
 }
 
+.branch-chip {
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.branch-chip-label {
+    letter-spacing: 0.02em;
+}
+
 .glass-panel {
     background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(12px);

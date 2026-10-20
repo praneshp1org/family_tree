@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>प्यारा श्रेष्ठ family tree</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -62,6 +63,9 @@
             <div class="flex items-center gap-2">
                 <span class="w-4 h-1 bg-slate-800 rounded"></span> <span id="legendParentText">Parent &amp; Sibling Lines</span>
             </div>
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-1 rounded" style="background: linear-gradient(90deg, #0ea5e9, #f97316, #14b8a6);"></span> <span id="legendBranchText">Branch Colors = Parent Couple</span>
+            </div>
             <div class="flex items-center gap-1.5">
                 <span class="w-3.5 h-3.5 rounded-md bg-amber-400 border border-amber-600 shadow-sm"></span> <span id="legendAncestorsText">Ancestors (Top)</span>
             </div>
@@ -76,6 +80,9 @@
         </div>
 
         <div class="absolute bottom-6 right-6 z-30 flex flex-col gap-2 glass-panel p-1.5 rounded-2xl shadow-lg border border-slate-200/80">
+            <button id="exportPngBtn" title="Export PNG" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-700 transition">
+                <i class="fa-solid fa-file-arrow-down text-base"></i>
+            </button>
             <button id="zoomInBtn" title="Zoom In" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-700 transition">
                 <i class="fa-solid fa-plus text-base"></i>
             </button>
