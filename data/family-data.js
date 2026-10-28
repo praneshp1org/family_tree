@@ -165,7 +165,7 @@ window.DEFAULT_FAMILY_DATA = [
         photo: "",
         bio: "",
         spouse: ["14"],
-        parents: ["7", "8"],
+        parents: [],
         children: ["17", "18", "19", "20"]
     },
     {
@@ -178,7 +178,7 @@ window.DEFAULT_FAMILY_DATA = [
         photo: "",
         bio: "",
         spouse: ["13"],
-        parents: [],
+        parents: ["7", "8"],
         children: ["17", "18", "19", "20"]
     },
     {
@@ -277,10 +277,10 @@ window.DEFAULT_FAMILY_DATA = [
         name: "Puja Shrestha",
         gender: "female",
         generation: 6,
-        birthYear: "",
+        birthYear: "1995",
         deathYear: "",
         photo: "",
-        bio: "",
+        bio: "Teacher at Jyoti Ma. Vi., Jhapa",
         spouse: [],
         parents: ["15", "16"],
         children: []
@@ -290,10 +290,10 @@ window.DEFAULT_FAMILY_DATA = [
         name: "Pratikshya Shrestha",
         gender: "female",
         generation: 6,
-        birthYear: "",
+        birthYear: "1997",
         deathYear: "",
         photo: "",
-        bio: "",
+        bio: "Assistant at Rastriya Banijya Bank, Nepal",
         spouse: [],
         parents: ["15", "16"],
         children: []
@@ -306,7 +306,7 @@ window.DEFAULT_FAMILY_DATA = [
         birthYear: "2002",
         deathYear: "",
         photo: "https://scontent.fbir4-2.fna.fbcdn.net/v/t39.30808-1/669836137_2500392057060928_6849392872254359347_n.jpg?stp=dst-jpg_tt6&cstp=mx1977x1971&ctp=s480x480&_nc_cat=111&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=1d2534&_nc_eui2=AeGhqu8A4BtVPXSEy0qHSiGWoxEeXnwi1HqjER5efCLUegJDZdgz__N9-5PFmgyxCM5kA69-hP7AChK4oxhxLuXl&_nc_ohc=YwJUJG7KCJcQ7kNvwEPBQ9W&_nc_oc=AdpK6z0U-oHKZiYmSg4spS5_ejALXH470e7jI8SqKRUszsNh5RHIS5deEGArD5hy8-iwSlS3J9q35h4G_UU0GbC8&_nc_zt=24&_nc_ht=scontent.fbir4-2.fna&_nc_gid=ibsJwdEetfU5nLAJQO9EEg&_nc_ss=7b2a8&oh=00_AQMDakNgb6XjMUc6JRfdt1T564vzUVmhnXFRJtBGx9mAiw&oe=6ADA600F",
-        bio: "Engineer",
+        bio: "Assistant Manager(IT) at Employees' Provident Fund, Nepal",
         spouse: [],
         parents: ["15", "16"],
         children: []
@@ -316,7 +316,7 @@ window.DEFAULT_FAMILY_DATA = [
         name: "Pranisha Shrestha",
         gender: "female",
         generation: 6,
-        birthYear: "",
+        birthYear: "2007",
         deathYear: "",
         photo: "",
         bio: "",
@@ -346,8 +346,21 @@ window.DEFAULT_FAMILY_DATA = [
         deathYear: "",
         photo: "",
         bio: "",
-        spouse: [],
+        spouse: ["271"],
         parents: ["7", "26"],
+        children: []
+    },
+        {
+        id: "271",
+        name: "Bimala Shrestha",
+        gender: "female",
+        generation: 5,
+        birthYear: "",
+        deathYear: "",
+        photo: "",
+        bio: "",
+        spouse: ["27"],
+        parents: [],
         children: []
     },
     {
@@ -359,8 +372,21 @@ window.DEFAULT_FAMILY_DATA = [
         deathYear: "",
         photo: "",
         bio: "",
-        spouse: [],
+        spouse: ["281"],
         parents: ["7", "26"],
+        children: []
+    },
+        {
+        id: "281",
+        name: "Indira Shrestha",
+        gender: "female",
+        generation: 5,
+        birthYear: "",
+        deathYear: "",
+        photo: "",
+        bio: "",
+        spouse: ["28"],
+        parents: [],
         children: []
     },
     {

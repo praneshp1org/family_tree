@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>प्यारा श्रेष्ठ family tree</title>
+    <meta name="description" content="Pyara Shrestha family tree, genealogy, and lineage chart. प्यारा श्रेष्ठ परिवार वृक्ष, श्रेष्ठ परिवार, and Shrestha family history in English and Nepali.">
+    <meta name="keywords" content="Pyara Shrestha, Pyara Shrestha family tree, Pyara Shrestha genealogy, प्यारा श्रेष्ठ, प्यारा श्रेष्ठ परिवार वृक्ष, Shrestha family tree, श्रेष्ठ परिवार, Nepali family history">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Pyara Shrestha Family Tree | प्यारा श्रेष्ठ परिवार वृक्ष">
+    <meta property="og:description" content="Explore the Pyara Shrestha family tree and genealogy in English and Nepali. Family lineage chart for the Shrestha family.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:8000/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pyara Shrestha Family Tree | प्यारा श्रेष्ठ परिवार वृक्ष">
+    <meta name="twitter:description" content="Pyara Shrestha family tree and genealogy in English and Nepali.">
+    <title>Pyara Shrestha Family Tree | प्यारा श्रेष्ठ परिवार वृक्ष</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,12 +40,37 @@
             }
         }
     </script>
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Pyara Shrestha Family Tree | प्यारा श्रेष्ठ परिवार वृक्ष",
+          "description": "Pyara Shrestha family tree, genealogy, and lineage chart in English and Nepali. A detailed Shrestha family history and family structure.",
+          "keywords": [
+            "Pyara Shrestha",
+            "Pyara Shrestha family tree",
+            "प्यारा श्रेष्ठ",
+            "प्यारा श्रेष्ठ परिवार वृक्ष",
+            "Shrestha family tree",
+            "श्रेष्ठ परिवार",
+            "Nepali family history"
+          ],
+          "inLanguage": ["en", "ne"],
+          "isPartOf": {
+            "@type": "WebSite",
+            "name": "Pyara Shrestha Family Tree"
+          }
+        }
+    </script>
 </head>
 <body class="h-screen w-screen flex flex-col antialiased text-slate-800">
+    <div style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0, 0, 0, 0); white-space:nowrap; border:0;">
+        Pyara Shrestha, Pyara Shrestha family tree, Pyara Shrestha genealogy, प्यारा श्रेष्ठ, प्यारा श्रेष्ठ परिवार वृक्ष, Shrestha family tree, श्रेष्ठ परिवार, Nepali family history
+    </div>
 
     <header class="absolute top-0 left-0 right-0 z-30 px-6 py-4 flex items-center justify-between pointer-events-none">
         <div class="glass-panel px-5 py-3 rounded-2xl shadow-sm border border-amber-900/10 flex items-center pointer-events-auto">
-            <h1 id="siteTitle" class="text-xl font-bold tracking-tight text-slate-900 leading-tight">प्यारा श्रेष्ठ family tree</h1>
+            <h1 id="siteTitle" class="text-xl font-bold tracking-tight text-slate-900 leading-tight">Pyara Shrestha Family Tree | प्यारा श्रेष्ठ परिवार वृक्ष</h1>
         </div>
 
         <div id="lineageBanner" class="hidden glass-panel px-5 py-2.5 rounded-2xl shadow-md border border-amber-500/30 text-xs font-bold text-slate-800 flex items-center gap-3 animate-pulse pointer-events-auto">
@@ -58,26 +93,6 @@
 
     <main class="flex-1 w-full h-full relative overflow-hidden bg-[#FAF7F2]">
         <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 24px 24px;"></div>
-
-        <div class="absolute bottom-6 left-6 z-30 glass-panel px-4 py-3 rounded-2xl shadow-lg border border-slate-200/80 flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-700">
-            <div class="flex items-center gap-2">
-                <span class="w-4 h-1 bg-slate-800 rounded"></span> <span id="legendParentText">Parent &amp; Sibling Lines</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-4 h-1 rounded" style="background: linear-gradient(90deg, #0ea5e9, #f97316, #14b8a6);"></span> <span id="legendBranchText">Branch Colors = Parent Couple</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span class="w-3.5 h-3.5 rounded-md bg-amber-400 border border-amber-600 shadow-sm"></span> <span id="legendAncestorsText">Ancestors (Top)</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span class="w-3.5 h-3.5 rounded-md bg-emerald-500 border border-emerald-700 shadow-sm"></span> <span id="legendHoveredText">Hovered Member</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span class="w-3.5 h-3.5 rounded-md bg-red-600 border border-red-800 shadow-sm"></span> <span id="legendDescendantsText">Descendants (Bottom)</span>
-            </div>
-            <div class="h-3 w-px bg-slate-300"></div>
-            <div id="legendTipText" class="text-slate-500 font-normal">🖱 Drag background or scroll wheel to navigate</div>
-        </div>
 
         <div class="absolute bottom-6 right-6 z-30 flex flex-col gap-2 glass-panel p-1.5 rounded-2xl shadow-lg border border-slate-200/80">
             <button id="exportPngBtn" title="Export PNG" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-700 transition">

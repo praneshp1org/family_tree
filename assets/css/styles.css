@@ -5,6 +5,57 @@ body {
     user-select: none;
 }
 
+@media print {
+    @page {
+        size: landscape;
+        margin: 12mm;
+    }
+
+    html, body {
+        overflow: visible !important;
+        background: #FAF7F2 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    header,
+    #memberDrawer,
+    #lineageBanner,
+    .absolute.bottom-6.left-6,
+    .absolute.bottom-6.right-6,
+    #searchResults {
+        display: none !important;
+    }
+
+    main {
+        overflow: visible !important;
+        height: auto !important;
+        background: #FAF7F2 !important;
+    }
+
+    #treeViewport {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    #treeCanvas {
+        position: static !important;
+        transform: none !important;
+        left: auto !important;
+        top: auto !important;
+    }
+
+    #svgConnectors,
+    #treeNodes {
+        position: static !important;
+    }
+
+    .glass-panel,
+    .member-card {
+        box-shadow: none !important;
+    }
+}
+
 .tree-container {
     cursor: grab;
     touch-action: none;
@@ -105,3 +156,52 @@ body {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(226, 232, 240, 0.9);
 }
+
+@media (max-width: 768px) {
+    body {
+        overflow: hidden;
+    }
+
+    header {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 0.75rem !important;
+        align-items: flex-start;
+    }
+
+    header > div:first-child {
+        width: 100%;
+    }
+
+    #siteTitle {
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+
+    .glass-panel {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .tree-container {
+        touch-action: none;
+    }
+
+    .absolute.bottom-6.right-6 {
+        bottom: 0.75rem;
+        right: 0.75rem;
+    }
+
+    .absolute.bottom-6.left-6 {
+        display: none;
+    }
+
+    .member-card {
+        width: 180px;
+    }
+
+    #searchInput {
+        font-size: 0.875rem;
+    }
+}
+

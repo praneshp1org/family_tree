@@ -201,8 +201,13 @@ window.onload = () => {
 
     const resizeObserver = new ResizeObserver(() => {
         drawOrthogonalConnectors();
+        centerTree();
     });
     resizeObserver.observe(treeNodes);
+
+    window.addEventListener('resize', () => {
+        requestAnimationFrame(() => centerTree());
+    });
 
     setTimeout(() => centerTree(), 100);
 };
@@ -211,6 +216,26 @@ function getSpouses(member) {
     if (!member.spouse) return [];
     const spouseIds = Array.isArray(member.spouse) ? member.spouse : [member.spouse];
     return spouseIds.map(id => familyData.find(m => m.id === id)).filter(Boolean);
+}
+
+function getFamilyGroupKey(member) {
+    const parentKey = getUnionKey(member.parents || []);
+    if (parentKey) return `parents-${parentKey}`;
+
+    const spouseIds = getSpouses(member).map(spouse => spouse.id);
+    for (const spouseId of spouseIds) {
+        const spouse = familyData.find(m => m.id === spouseId);
+        if (!spouse) continue;
+
+        const spouseParentKey = getUnionKey(spouse.parents || []);
+        if (spouseParentKey) return `parents-${spouseParentKey}`;
+    }
+
+    if (spouseIds.length > 0) {
+        return `couple-${[member.id, ...spouseIds].sort().join('-')}`;
+    }
+
+    return `solo-${member.id}`;
 }
 
 function initTree() {
@@ -234,24 +259,40 @@ function initTree() {
         genRow.appendChild(genLabel);
 
         const genMembersContainer = document.createElement('div');
-        genMembersContainer.className = 'flex flex-wrap justify-center items-start gap-12 sm:gap-16 px-12';
+        genMembersContainer.className = 'flex flex-wrap justify-center items-start gap-6 sm:gap-10 px-12';
 
-        const processed = new Set();
+        const groupedMembers = new Map();
+        const renderedMemberIds = new Set();
 
         membersInGen.forEach(member => {
-            if (processed.has(member.id)) return;
+            const groupKey = getFamilyGroupKey(member);
+            if (!groupedMembers.has(groupKey)) {
+                groupedMembers.set(groupKey, new Set());
+            }
 
-            const coupleWrapper = document.createElement('div');
-            coupleWrapper.className = 'flex items-center gap-2 sm:gap-3 relative p-2 bg-white/80 rounded-3xl border border-slate-200/90 shadow-sm';
-            coupleWrapper.id = `couple-wrapper-${member.id}`;
+            groupedMembers.get(groupKey).add(member.id);
+        });
 
-            const card = createMemberCard(member);
-            coupleWrapper.appendChild(card);
-            processed.add(member.id);
+        groupedMembers.forEach(memberIds => {
+            const familyGroup = document.createElement('div');
+            familyGroup.className = 'flex items-center justify-center gap-2 sm:gap-3 relative p-2 bg-white/80 rounded-3xl border border-slate-200/90 shadow-sm';
 
-            const spouses = getSpouses(member);
-            spouses.forEach(spouse => {
-                if ((spouse.generation || 1) === g && !processed.has(spouse.id)) {
+            const orderedIds = Array.from(memberIds).filter(id => !renderedMemberIds.has(id));
+            if (orderedIds.length === 0) return;
+
+            orderedIds.forEach(id => {
+                const member = familyData.find(m => m.id === id);
+                if (!member || renderedMemberIds.has(member.id)) return;
+
+                const card = createMemberCard(member);
+                familyGroup.appendChild(card);
+                renderedMemberIds.add(member.id);
+
+                const spouses = getSpouses(member).filter(spouse =>
+                    (spouse.generation || 1) === g && !renderedMemberIds.has(spouse.id)
+                );
+
+                spouses.forEach(spouse => {
                     const marriageBadge = document.createElement('div');
                     marriageBadge.id = `union-${[member.id, spouse.id].sort().join('-')}`;
                     marriageBadge.className = 'w-7 h-7 rounded-full bg-amber-100 border-2 border-amber-500 text-amber-700 flex items-center justify-center text-xs font-bold shadow-md z-20 -mx-1 hover:scale-110 transition';
@@ -259,14 +300,13 @@ function initTree() {
                     marriageBadge.innerHTML = '<i class="fa-solid fa-heart text-[10px] text-red-600"></i>';
 
                     const spouseCard = createMemberCard(spouse);
-
-                    coupleWrapper.appendChild(marriageBadge);
-                    coupleWrapper.appendChild(spouseCard);
-                    processed.add(spouse.id);
-                }
+                    familyGroup.appendChild(marriageBadge);
+                    familyGroup.appendChild(spouseCard);
+                    renderedMemberIds.add(spouse.id);
+                });
             });
 
-            genMembersContainer.appendChild(coupleWrapper);
+            genMembersContainer.appendChild(familyGroup);
         });
 
         genRow.appendChild(genMembersContainer);
@@ -698,9 +738,13 @@ function setupPanZoom() {
 }
 
 function centerTree() {
+    const canvasWidth = treeCanvas.scrollWidth || treeNodes.scrollWidth || treeViewport.clientWidth;
+    const canvasHeight = treeCanvas.scrollHeight || treeNodes.scrollHeight || treeViewport.clientHeight;
+
     zoomScale = 1;
-    panX = Math.max(0, (treeViewport.clientWidth - treeNodes.offsetWidth) / 2);
-    panY = 40;
+    panX = (treeViewport.clientWidth - canvasWidth) / 2;
+    panY = Math.max(60, Math.min(120, treeViewport.clientHeight * 0.08));
+
     treeCanvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
     drawOrthogonalConnectors();
 }
@@ -732,32 +776,48 @@ async function exportTreeAsPng() {
             await document.fonts.ready;
         }
 
-        const canvasClone = treeCanvas.cloneNode(true);
-        canvasClone.classList.remove('transform-gpu');
-        canvasClone.style.transform = 'none';
-        canvasClone.style.position = 'static';
-        canvasClone.style.width = `${treeCanvas.scrollWidth}px`;
-        canvasClone.style.height = `${treeCanvas.scrollHeight}px`;
-        canvasClone.style.minWidth = `${treeCanvas.scrollWidth}px`;
-        canvasClone.style.minHeight = `${treeCanvas.scrollHeight}px`;
+        const currentTransform = window.getComputedStyle(treeCanvas).transform;
+        const cloneViewport = treeViewport.cloneNode(true);
+        cloneViewport.style.position = 'fixed';
+        cloneViewport.style.left = '0';
+        cloneViewport.style.top = '0';
+        cloneViewport.style.width = `${treeViewport.clientWidth}px`;
+        cloneViewport.style.height = `${treeViewport.clientHeight}px`;
+        cloneViewport.style.overflow = 'hidden';
+        cloneViewport.style.pointerEvents = 'none';
+        cloneViewport.style.background = '#FAF7F2';
+        cloneViewport.style.opacity = '1';
+        cloneViewport.style.transform = 'none';
 
-        // Export-only breathing room to avoid html2canvas text clipping on tight rows.
-        canvasClone.querySelectorAll('.member-card').forEach(card => {
+        const canvasClone = cloneViewport.querySelector('#treeCanvas');
+        if (canvasClone) {
+            canvasClone.classList.remove('transform-gpu');
+            canvasClone.style.position = 'relative';
+            canvasClone.style.left = '0';
+            canvasClone.style.top = '0';
+            canvasClone.style.transform = currentTransform;
+            canvasClone.style.width = `${treeCanvas.scrollWidth}px`;
+            canvasClone.style.height = `${treeCanvas.scrollHeight}px`;
+            canvasClone.style.minWidth = `${treeCanvas.scrollWidth}px`;
+            canvasClone.style.minHeight = `${treeCanvas.scrollHeight}px`;
+        }
+
+        cloneViewport.querySelectorAll('.member-card').forEach(card => {
             card.style.overflow = 'visible';
             card.style.paddingBottom = '14px';
         });
 
-        canvasClone.querySelectorAll('.member-card h4').forEach(el => {
+        cloneViewport.querySelectorAll('.member-card h4').forEach(el => {
             el.style.lineHeight = '1.3';
             el.style.paddingBottom = '2px';
         });
 
-        canvasClone.querySelectorAll('.member-card p').forEach(el => {
+        cloneViewport.querySelectorAll('.member-card p').forEach(el => {
             el.style.lineHeight = '1.35';
             el.style.paddingBottom = '2px';
         });
 
-        canvasClone.querySelectorAll('.member-card .branch-chip').forEach(el => {
+        cloneViewport.querySelectorAll('.member-card .branch-chip').forEach(el => {
             el.style.minHeight = '26px';
             el.style.alignItems = 'center';
         });
@@ -769,11 +829,11 @@ async function exportTreeAsPng() {
         exportSurface.style.transform = 'none';
         exportSurface.style.opacity = '1';
         exportSurface.style.pointerEvents = 'none';
-        exportSurface.style.padding = '72px';
+        exportSurface.style.padding = '0';
         exportSurface.style.background = '#FAF7F2';
         exportSurface.style.display = 'inline-block';
         exportSurface.style.zIndex = '1';
-        exportSurface.appendChild(canvasClone);
+        exportSurface.appendChild(cloneViewport);
         document.body.appendChild(exportSurface);
 
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -783,7 +843,9 @@ async function exportTreeAsPng() {
             scale: Math.min(2, window.devicePixelRatio || 1),
             useCORS: true,
             allowTaint: false,
-            logging: false
+            logging: false,
+            width: treeViewport.clientWidth,
+            height: treeViewport.clientHeight
         });
 
         const now = new Date();
